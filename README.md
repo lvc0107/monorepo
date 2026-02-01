@@ -1,58 +1,34 @@
-Monorepo - Multi-Project Repository
+# Monorepo - Multi-Project Repository (PoC)
 This monorepo contains three independent Python projects:
 
 Projects
 1. FastAPI Service (/fastapi-service)
 A simple FastAPI application with a hello world endpoint.
-Run locally:
-bashcd fastapi-service
-pip install -r requirements.txt
-uvicorn main:app --reload
-Visit: http://localhost:8000
+
+- bashcd fastapi-service
+- pip install -r requirements.txt
+- uvicorn main:app --reload
+- Visit: http://localhost:8000
 
 2. AWS Lambda (/aws-lambda)
 A serverless Python function for AWS Lambda.
 Deploy:
-bashcd aws-lambda
-zip function.zip lambda_function.py
-# Upload function.zip to AWS Lambda
+- bashcd aws-lambda
+- zip function.zip lambda_function.py.
+- Upload function.zip to AWS Lambda
 
 3. Kubernetes CronJob (/k8s-cronjob)
 A Python script designed to run as a Kubernetes CronJob.
 Deploy:
-bashcd k8s-cronjob
-docker build -t your-registry/k8s-cronjob:latest .
-docker push your-registry/k8s-cronjob:latest
-kubectl apply -f cronjob.yaml
+- bashcd k8s-cronjob
+- docker build -t your-registry/k8s-cronjob:latest .
+- docker push your-registry/k8s-cronjob:latest
+- kubectl apply -f cronjob.yaml
 
 
-./.gitignore
-./QUICKSTART.MD
-./README.md
-./aws-lambda1/README.md
-./aws-lambda1/lambda_functions.py
-./aws-lambda1/requirements.txt
-./aws-lambda2/README.md
-./aws-lambda2/lambda_functions.py
-./aws-lambda2/requirements.txt
-./fastapi-service1/README.md
-./fastapi-service1/main.py
-./fastapi-service1/requirements.txt
-./fastapi-service2/README.md
-./fastapi-service2/main.py
-./fastapi-service2/requirements.txt
-./k8s-cronjob1/Dokerfile
-./k8s-cronjob1/README.md
-./k8s-cronjob1/app.py
-./k8s-cronjob1/cronjob.yaml
-./k8s-cronjob1/requirements.txt
-./k8s-cronjob2/Dokerfile
-./k8s-cronjob2/README.md
-./k8s-cronjob2/app.py
-./k8s-cronjob2/cronjob.yaml
-./k8s-cronjob2/requirements.txt
 
-Repository Structure:
+
+### Inital Repository Structure:
 ```
 tree .
 monorepo
@@ -118,13 +94,13 @@ CI/CD strategy
         │                          │                          │
         │                          │                          │
 ┌───────▼────────┐       ┌─────────▼─────────┐       ┌────────▼────────┐
-│ Build & Test   │       │ Build & Test      │       │ Build Job Image  │
-│ (SAM / Pytest) │       │ (Docker)           │       │ (Docker)        │
+│ Build & Test   │       │ Build & Test      │       │ Build Job Image │
+│ (SAM / Pytest) │       │ (Docker)          │       │ (Docker)        │
 └───────┬────────┘       └─────────┬─────────┘       └────────┬────────┘
         │                          │                          │
 ┌───────▼────────┐       ┌─────────▼─────────┐       ┌────────▼────────┐
 │ Package Zip    │       │ Build Image       │       │ Push Image      │
-│ (artifact)     │       │ (FastAPI)          │       │ (registry)     │
+│ (artifact)     │       │ (FastAPI)         │       │ (registry)      │
 └───────┬────────┘       └─────────┬─────────┘       └────────┬────────┘
         │                          │                          │
 ┌───────▼────────┐       ┌─────────▼─────────┐       ┌────────▼────────┐
@@ -134,8 +110,8 @@ CI/CD strategy
         │                          │                          │
 ┌───────▼────────┐       ┌─────────▼─────────┐       ┌────────▼────────┐
 │ Deploy Lambda  │       │ kubectl deploy    │       │ Runtime schedule│
-│ (AWS API)     │       │ (Deployment)      │       │ (K8s)           │
-└────────────────┘       └───────────────────┘       └──────────────────┘
+│ (AWS API)      │       │ (Deployment)      │       │ (K8s)           │
+└────────────────┘       └───────────────────┘       └─────────────────┘
 
 ```
 
@@ -153,8 +129,8 @@ Paralellims in CI
         ┌──────────────┴──────────────┐
         │                             │
 ┌───────▼────────┐          ┌─────────▼─────────┐
-│ Lambda A        │          │ Lambda B          │
-│ changed?        │          │ changed?          │
+│ Lambda A       │          │ Lambda B          │
+│ changed?       │          │ changed?          │
 └───────┬────────┘          └─────────┬─────────┘
         │ yes                         │ no
         │                             │
@@ -303,8 +279,8 @@ docker exec jenkins-local \
 
 
 
-TEST 1
-
+### Pipeline TEST 1
+```
 pipeline {
   agent any
   stages {
@@ -315,3 +291,4 @@ pipeline {
     }
   }
 }
+```
