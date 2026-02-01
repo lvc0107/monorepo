@@ -21,16 +21,19 @@ pipeline {
       }
     }
 
-    stage('Select Kubernetes Context') {
-    steps {
+    stage('Kubernetes Context') {
+      steps {
         sh '''
-        kubectl config use-context docker-desktop
-        kubectl config current-context
-        kubectl get nodes
+          mkdir -p /root/.kube
+          kubectl config set-cluster docker-desktop --server=https://host.docker.internal:6443 --insecure-skip-tls-verify=true || true
+          kubectl config set-credentials docker-desktop --username=docker --password=docker || true
+          kubectl config set-context docker-desktop --cluster=docker-desktop --user=docker-desktop || true
+          kubectl config use-context docker-desktop
+          kubectl cluster-info
+          kubectl get nodes
         '''
+      }
     }
-}
-
 
     stage('Build Docker Image') {
       steps {
@@ -42,23 +45,7 @@ pipeline {
       }
     }
 
-    stage('Helm Deploy (DEV)') {
-      when {
-        not { branch 'main' }
-      }
-      steps {
-        sh """
-          helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
-            --set image.repository=${IMAGE_NAME} \
-            --set image.tag=${IMAGE_TAG}
-        """
-      }
-    }
-
-    stage('Helm Deploy (MAIN)') {
-      when {
-        branch 'main'
-      }
+    stage('Helm Deploy') {
       steps {
         sh """
           helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
