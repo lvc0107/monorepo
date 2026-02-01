@@ -3,23 +3,24 @@ pipeline {
 
   stages {
 
-    stage('CI - Feature / PR') {
-      when {
-        expression { env.CHANGE_ID != null }
-      }
+    stage('PR Validation') {
+      when { changeRequest() }
       steps {
-        echo "🧪 CI para Pull Request #${env.CHANGE_ID}"
-        echo "Branch: ${env.BRANCH_NAME}"
-        sh 'echo correr tests DEV'
+        sh 'python --version'
       }
     }
 
-    stage('CD - Main') {
-      when {
-        branch 'main'
-      }
+    stage('Build Docker Image') {
+      when { branch 'main' }
       steps {
-        echo "🚀 Deploy a PROD"
+        sh 'docker build -t fastapi-app:latest .'
+      }
+    }
+
+    stage('Deploy to K8s') {
+      when { branch 'main' }
+      steps {
+        sh 'kubectl apply -f k8s/deployment.yaml'
       }
     }
   }
