@@ -21,6 +21,17 @@ pipeline {
       }
     }
 
+    stage('Select Kubernetes Context') {
+    steps {
+        sh '''
+        kubectl config use-context docker-desktop
+        kubectl config current-context
+        kubectl get nodes
+        '''
+    }
+}
+
+
     stage('Build Docker Image') {
       steps {
         sh """
