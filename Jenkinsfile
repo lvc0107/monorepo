@@ -11,9 +11,8 @@ pipeline {
         echo "🧪 CI para Pull Request #${env.CHANGE_ID}"
         echo "Branch: ${env.BRANCH_NAME}"
         sh 'echo correr tests DEV'
-      }
-        steps {
-            sh '''
+     
+        sh '''
             echo "Simulating failing tests"
             exit 1
             '''
