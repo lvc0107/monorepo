@@ -1,27 +1,25 @@
 pipeline {
-  agent any
+    agent any
 
-  stages {
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                dir('fastapi-service1') {
+                    sh 'docker build -t fastapi-service1:latest .'
+                }
+            }
+        }
 
-    stage('PR Validation') {
-      when { changeRequest() }
-      steps {
-        sh 'python --version'
-      }
+        stage('Load image into kind') {
+            steps {
+                sh 'kind load docker-image fastapi-service1:latest'
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh 'kubectl apply -f fastapi-service1/k8s/deployment.yaml'
+            }
+        }
     }
-
-    stage('Build Docker Image') {
-      when { branch 'main' }
-      steps {
-        sh 'docker build -t fastapi-app:latest .'
-      }
-    }
-
-    stage('Deploy to K8s') {
-      when { branch 'main' }
-      steps {
-        sh 'kubectl apply -f k8s/deployment.yaml'
-      }
-    }
-  }
 }
