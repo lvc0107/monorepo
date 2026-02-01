@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'mycompany/jenkins-kind-agent:latest'
+            image 'jenkins-kind-agent:latest'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
