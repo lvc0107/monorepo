@@ -1,7 +1,7 @@
 FROM alpine:3.18
 
 # Dependencias básicas + SSL
-RUN apk add --no-cache bash curl git docker py3-pip make unzip gettext tar gzip ca-certificates && \
+RUN apk add --no-cache bash curl git docker-cli py3-pip make unzip gettext tar gzip ca-certificates && \
     update-ca-certificates
 
 # kubectl
