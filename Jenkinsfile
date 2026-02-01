@@ -1,12 +1,21 @@
 pipeline {
     agent {
         docker {
-            image 'jenkins-kind-agent:latest'
+            image 'jenkins-agent-helm:latest'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
-
     stages {
+        stage('Check tools') {
+            steps {
+                sh '''
+                docker --version
+                kind --version
+                kubectl version --client
+                helm version
+                '''
+            }
+        }
 
         stage('Build FastAPI Docker Image') {
             steps {

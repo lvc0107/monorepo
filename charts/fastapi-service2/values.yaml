@@ -1,0 +1,13 @@
+replicas: 1
+
+image:
+  repository: fastapi-service1
+  tag: latest
+
+service:
+  type: ClusterIP
+  port: 8000
+
+# Entorno dev
+env:
+  LOG_LEVEL: DEBUG
