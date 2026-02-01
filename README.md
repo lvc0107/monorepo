@@ -299,9 +299,9 @@ HELM
 
 Lets create a docker image for hosting the jenkins agent in charge to deploy the fast api microservice
 
-
-1) create jenkins_agent folder (this is here just as PoC. in a real project we must no mixs the 
+1) Create charts folder (THI must be on its own repo (a config repo))
+2) create jenkins_agent folder (this is here just as PoC. in a real project we must no mixs the 
 product code with the insfrasture code)
-2) Create Dockerfile
-3) docker build -t jenkins-agent-helm:latest . (Not need to upload to a registry (PoC))
-4)
+3) Create Dockerfile
+4) docker build -t jenkins-agent-helm:latest . (Not need to upload to a registry (PoC))
+5)

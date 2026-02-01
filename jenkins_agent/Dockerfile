@@ -1,7 +1,7 @@
 FROM alpine:3.18
 
 # Dependencias básicas + SSL
-RUN apk add --no-cache bash curl git docker-cli py3-pip make unzip gettext tar gzip ca-certificates && \
+RUN apk add --no-cache bash curl git docker py3-pip make unzip gettext tar gzip ca-certificates && \
     update-ca-certificates
 
 # kubectl
@@ -28,4 +28,4 @@ RUN curl -L "https://github.com/docker/compose/releases/download/v2.22.0/docker-
 # Docker socket
 ENV DOCKER_HOST=unix:///var/run/docker.sock
 
-ENTRYPOINT ["/bin/bash"]
+CMD ["tail", "-f", "/dev/null"]
