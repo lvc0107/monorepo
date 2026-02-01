@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       image 'jenkins-agent-helm:latest'
-      args '-v /var/run/docker.sock:/var/run/docker.sock -v ~/.kube:/root/.kube'
+      args '-v /var/run/docker.sock:/var/run/docker.sock -v /root/.kube:/root/.kube'
     }
   }
 
