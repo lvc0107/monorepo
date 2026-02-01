@@ -303,5 +303,22 @@ Lets create a docker image for hosting the jenkins agent in charge to deploy the
 2) create jenkins_agent folder (this is here just as PoC. in a real project we must no mixs the 
 product code with the insfrasture code)
 3) Create Dockerfile
-4) docker build -t jenkins-agent-helm:latest . (Not need to upload to a registry (PoC))
-5)
+4) ```docker build -t jenkins-agent-helm:latest``` . (Not need to upload to a registry (PoC))
+5) Using Docker Destop. Enable Kubernetes. We are gonna create a cluster locally using  and conencting with the same docker deamon.
+6) Create a running container for teh agent. 
+```
+docker run -d \                   
+  --name jenkins-agent \
+  --restart unless-stopped \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v ~/.kube:/root/.kube \
+  jenkins-agent-helm:latest
+  ```
+
+7) Verify the Jenkins controller and the Jenkis agent are running.
+```
+docker ps | grep jenkins 
+
+254acdd63565   jenkins-agent-helm:latest   "tail -f /dev/null"      3 minutes ago        Up 3 minutes                                                           jenkins-agent
+e4a8b59a81e3   jenkins/jenkins:lts         "/usr/bin/tini -- /u…"   22 hours ago         Up 27 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins
+```

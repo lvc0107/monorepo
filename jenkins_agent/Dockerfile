@@ -1,6 +1,6 @@
 FROM alpine:3.18
 
-# Dependencias básicas + SSL
+# Basic dependencies + SSL
 RUN apk add --no-cache bash curl git py3-pip make unzip gettext tar gzip ca-certificates && \
     update-ca-certificates
 
@@ -28,7 +28,7 @@ RUN curl -LO https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz && \
 RUN curl -Lo /usr/local/bin/kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64 && \
     chmod +x /usr/local/bin/kind
 
-# Docker Compose (opcional)
+# Docker Compose (optional)
 RUN curl -L "https://github.com/docker/compose/releases/download/v2.22.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 

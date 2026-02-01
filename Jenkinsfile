@@ -1,46 +1,70 @@
 pipeline {
-    agent {
-        docker {
-            image 'jenkins-agent-helm:latest'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
+  agent {
+    docker {
+      image 'jenkins-agent-helm:latest'
+      args '-v /var/run/docker.sock:/var/run/docker.sock -v ~/.kube:/root/.kube'
     }
-    stages {
-        stage('Check tools') {
-            steps {
-                sh '''
-                docker --version
-                kind --version
-                kubectl version --client
-                helm version
-                '''
-            }
-        }
+  }
 
-        stage('Build FastAPI Docker Image') {
-            steps {
-                dir('fastapi-service1') {
-                    sh 'docker build -t fastapi-service1:latest .'
-                }
-            }
-        }
+  environment {
+    SERVICE_NAME = 'fastapi-service1'
+    IMAGE_NAME   = 'fastapi-service1'
+    IMAGE_TAG    = "${env.BUILD_NUMBER}"
+    CHART_PATH   = 'fastapi-service1/charts/fastapi-service1'
+  }
 
-        stage('Load image into kind') {
-            steps {
-                sh 'kind load docker-image fastapi-service1:latest'
-            }
-        }
+  stages {
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh 'kubectl apply -f fastapi-service1/k8s/deployment.yaml'
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                sh 'kubectl get pods -l app=fastapi-service1'
-            }
-        }
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
+
+    stage('Build Docker Image') {
+      steps {
+        sh """
+          docker build \
+            -t ${IMAGE_NAME}:${IMAGE_TAG} \
+            fastapi-service1
+        """
+      }
+    }
+
+    stage('Helm Deploy (DEV)') {
+      when {
+        not { branch 'main' }
+      }
+      steps {
+        sh """
+          helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
+            --set image.repository=${IMAGE_NAME} \
+            --set image.tag=${IMAGE_TAG}
+        """
+      }
+    }
+
+    stage('Helm Deploy (MAIN)') {
+      when {
+        branch 'main'
+      }
+      steps {
+        sh """
+          helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
+            -f ${CHART_PATH}/values-prod.yaml \
+            --set image.repository=${IMAGE_NAME} \
+            --set image.tag=${IMAGE_TAG}
+        """
+      }
+    }
+  }
+
+  post {
+    failure {
+      echo "❌ Deployment failed"
+    }
+    success {
+      echo "✅ Deployment successful"
+    }
+  }
 }
