@@ -13,7 +13,9 @@ RUN STABLE=$(curl -L -s https://dl.k8s.io/release/stable.txt | xargs) && \
 # Docker CLI
 RUN curl -L https://download.docker.com/linux/static/stable/x86_64/docker-24.0.5.tgz | tar -xz && \
     mv docker/docker /usr/local/bin/ && \
-    rm -rf docker
+    chmod +x /usr/local/bin/docker && \
+    rm -rf docker && \
+    docker --version
 
 # Helm
 RUN curl -LO https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz && \
