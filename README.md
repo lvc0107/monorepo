@@ -115,7 +115,7 @@ CI/CD strategy
 
 ```
 
-Paralellims in CI
+Parallelism in CI
 
 ```
 
@@ -169,7 +169,7 @@ Paralellims in CI
 This diagram represents the logical delivery flow.
 Infrastructure choices only decide where each box executes.
 
-K8
+K8s
 ```
                     ┌────────────────────┐
                     │ Jenkins Controller │
@@ -266,12 +266,12 @@ docker exec jenkins-local \
 | Feature                                    | Enabled                  |
 | ------------------------------------------ | ------------------------- |
 | UI Jenkins                                 | ✅ `http://localhost:8080` |
-| Pipelines declarativos                     | ✅                         |
+| Declarative pipelines                     | ✅                         |
 | Docker agents (`agent { docker { ... } }`) | ✅                         |
-| Contenedores por stage                     | ✅                         |
-| Builds paralelos                           | ✅                         |
+| Containers per stage                     | ✅                         |
+| Parallel builds                           | ✅                         |
 | Monorepo pipelines                         | ✅                         |
-| SAM / kubectl vía imágenes                 | ✅                         |
+| SAM / kubectl via images                 | ✅                         |
 
 
 🔐 Get initial password
