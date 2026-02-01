@@ -1,7 +1,7 @@
 FROM alpine:3.18
 
 # Dependencias básicas + SSL
-RUN apk add --no-cache bash curl git docker-cli py3-pip make unzip gettext tar gzip ca-certificates && \
+RUN apk add --no-cache bash curl git py3-pip make unzip gettext tar gzip ca-certificates && \
     update-ca-certificates
 
 # kubectl
@@ -9,6 +9,11 @@ RUN STABLE=$(curl -L -s https://dl.k8s.io/release/stable.txt | xargs) && \
     curl -LO https://dl.k8s.io/release/${STABLE}/bin/linux/amd64/kubectl && \
     chmod +x kubectl && \
     mv kubectl /usr/local/bin/
+
+# Docker CLI
+RUN curl -L https://download.docker.com/linux/static/stable/x86_64/docker-24.0.5.tgz | tar -xz && \
+    mv docker/docker /usr/local/bin/ && \
+    rm -rf docker
 
 # Helm
 RUN curl -LO https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz && \
