@@ -218,14 +218,14 @@ K8
 ```
 
 
-| Propiedad             | Cumple |
-| --------------------- | ------ |
-| Builds independientes | ✅      |
-| Deploys aislados      | ✅      |
-| Paralelismo           | ✅      |
-| Reproducibilidad      | ✅      |
-| Escalabilidad         | ✅      |
-| Separación Dev / Ops  | ✅      |
+| Property              | Complies |
+| --------------------- | -------- |
+| Independent builds    | ✅       |
+| Isolated deploys      | ✅       |
+| Parallelism           | ✅       |
+| Reproducibility       | ✅       |
+| Scalability           | ✅       |
+| Dev / Ops separation  | ✅       |
 
 Jenkins (locally just for PoC)
 ```
@@ -240,9 +240,9 @@ docker run -d \
   jenkins/jenkins:lts
 
 ```
-PUEDE FALLAR ya que no ssabe como usar la docker CLI provista por el host
-notar que si debemos resintalar tambien debemos borrar el volumen
-Es una PoC, estamos jugando
+MAY FAIL because it doesn't know how to use the docker CLI provided by the host
+note that if we must reinstall we must also delete the volume
+It's a PoC, we're playing
 
 docker stop jenkins-local
 docker rm jenkins-local
@@ -253,7 +253,7 @@ jenkins-local
 jenkins_home
 
 
-usando Docker compose se arregla
+Using Docker compose it fixes
 ```
 version: '3.8'
 
@@ -285,9 +285,9 @@ docker exec jenkins-local \
 
 
 
-🔍 Qué habilita exactamente este comando
+🔍 What exactly does this command enable
 
-| Feature                                    | Habilitado                |
+| Feature                                    | Enabled                  |
 | ------------------------------------------ | ------------------------- |
 | UI Jenkins                                 | ✅ `http://localhost:8080` |
 | Pipelines declarativos                     | ✅                         |
@@ -298,7 +298,7 @@ docker exec jenkins-local \
 | SAM / kubectl vía imágenes                 | ✅                         |
 
 
-🔐 Obtener password inicial
+🔐 Get initial password
 
 
 
@@ -315,5 +315,3 @@ pipeline {
     }
   }
 }
-# monorepo
-# monorepo

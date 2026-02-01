@@ -1,0 +1,2 @@
+# AWS Lambda includes boto3 and other common libraries by default
+# Add any additional dependencies here

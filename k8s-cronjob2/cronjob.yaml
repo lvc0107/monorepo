@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello-world-cronjob
+  namespace: default
+spec:
+  # Schedule: Run every day at midnight (UTC)
+  # Cron format: minute hour day month weekday
+  # Examples:
+  #   "0 0 * * *"     - Every day at midnight
+  #   "*/5 * * * *"   - Every 5 minutes
+  #   "0 */2 * * *"   - Every 2 hours
+  #   "0 9 * * 1-5"   - 9 AM on weekdays
+  schedule: "0 0 * * *"
+  
+  # Timezone (requires Kubernetes 1.27+)
+  # timeZone: "America/New_York"
+  
+  # Job history limits
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  
+  # Concurrency policy: Allow, Forbid, or Replace
+  concurrencyPolicy: Forbid
+  
+  # Starting deadline in seconds
+  startingDeadlineSeconds: 300
+  
+  jobTemplate:
+    spec:
+      # Time to keep completed jobs
+      ttlSecondsAfterFinished: 86400
+      
+      template:
+        metadata:
+          labels:
+            app: hello-world-cronjob
+        spec:
+          restartPolicy: OnFailure
+          
+          containers:
+          - name: hello-world
+            image: your-registry/k8s-cronjob:latest
+            imagePullPolicy: Always
+            
+            env:
+            - name: JOB_NAME
+              value: "hello-world-cronjob"
+            
+            # Resource limits
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+            
+            # Optional: Add a security context
+            # securityContext:
+            #   runAsNonRoot: true
+            #   runAsUser: 1000
+            #   allowPrivilegeEscalation: false
+          
+          # Optional: Add image pull secrets if using private registry
+          # imagePullSecrets:
+          # - name: registry-secret
