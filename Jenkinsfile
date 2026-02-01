@@ -1,8 +1,14 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'mycompany/jenkins-kind-agent:latest'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     stages {
-        stage('Build Docker Image') {
+
+        stage('Build FastAPI Docker Image') {
             steps {
                 dir('fastapi-service1') {
                     sh 'docker build -t fastapi-service1:latest .'
@@ -19,6 +25,12 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh 'kubectl apply -f fastapi-service1/k8s/deployment.yaml'
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'kubectl get pods -l app=fastapi-service1'
             }
         }
     }
