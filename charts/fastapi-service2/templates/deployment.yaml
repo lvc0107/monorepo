@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }} # Release es un objeto interno de Helm que representa la release que se está instalando
+  name: {{ .Release.Name }} # Release is an internal Helm object representing the release being installed
   labels:
     app: {{ .Release.Name }}
 spec:

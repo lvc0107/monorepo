@@ -1,10 +1,20 @@
-{{/* Devuelve el nombre completo de la app incluyendo release */}}
-{{- define "fastapi-service1.fullname" -}}
-{{ .Release.Name }}
+{{/*
+Base chart name
+*/}}
+{{- define "fastapi-service1.name" -}}
+fastapi-service1
 {{- end }}
 
-{{/* Devuelve etiquetas comunes */}}
+{{/*
+Full release name
+*/}}
+{{- define "fastapi-service1.fullname" -}}
+{{- printf "%s" (include "fastapi-service1.name" .) -}}
+{{- end }}
+
+{{/*
+Labels compartidos entre Deployment y Service
+*/}}
 {{- define "fastapi-service1.labels" -}}
-app.kubernetes.io/name: {{ include "fastapi-service1.fullname" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app: fastapi-service1
 {{- end }}
