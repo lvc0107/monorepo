@@ -322,3 +322,14 @@ docker ps | grep jenkins
 254acdd63565   jenkins-agent-helm:latest   "tail -f /dev/null"      3 minutes ago        Up 3 minutes                                                           jenkins-agent
 e4a8b59a81e3   jenkins/jenkins:lts         "/usr/bin/tini -- /u…"   22 hours ago         Up 27 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins
 ```
+8) in Jenkins Create credentials for k8 cluster
+ 8.1) cat kube_config >> kube_config(in host)
+ 8.2) In Jenkins → Manage Jenkins → Credentials
+Scope: Global
+Kind: Secret file
+File: paste kube_config file
+ID: kubeconfig-docker-desktop
+📌 This is simulating exactly:
+- EKS kubeconfig
+- GKE kubeconfig
+- AKS kubeconfig
