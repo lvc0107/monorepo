@@ -1,13 +1,11 @@
-replicas: 1
+replicaCount: 1
 
 image:
   repository: fastapi-service1
   tag: latest
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
-  port: 8000
-
-# Entorno dev
-env:
-  LOG_LEVEL: DEBUG
+  port: 80
+  targetPort: 8000

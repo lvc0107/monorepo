@@ -1,21 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }} # Release es un objeto interno de Helm que representa la release que se está instalando
+  name: fastapi-service1
   labels:
-    app: {{ .Release.Name }}
+    app: fastapi-service1
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      app: fastapi-service1
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}
+        app: fastapi-service1
     spec:
       containers:
-        - name: {{ .Release.Name }}
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        - name: fastapi-service1
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: {{ .Values.service.port }}
+            - containerPort: 8000

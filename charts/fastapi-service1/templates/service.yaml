@@ -1,15 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "fastapi-service1.fullname" . }}
-  labels:
-    {{- include "fastapi-service1.labels" . | nindent 4 }}
+  name: fastapi-service1
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.port }}
-      protocol: TCP
-      name: http
+  type: ClusterIP
   selector:
-    app.kubernetes.io/name: {{ include "fastapi-service1.fullname" . }}
+    app: fastapi-service1 
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
