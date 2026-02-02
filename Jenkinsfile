@@ -1,27 +1,64 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'jenkins-agent-helm:latest'
+      args '-v /var/run/docker.sock:/var/run/docker.sock'
+    }
+  }
+
+  environment {
+    SERVICE_NAME = 'fastapi-service1'
+    IMAGE_NAME   = 'fastapi-service1'
+    IMAGE_TAG    = "${env.BUILD_NUMBER}"
+    CHART_PATH   = 'charts/fastapi-service1'
+  }
 
   stages {
 
-    stage('CI - Feature / PR') {
-      when {
-        expression { env.CHANGE_ID != null }
-      }
+    stage('Checkout') {
       steps {
-        echo "🧪 CI para Pull Request #${env.CHANGE_ID}"
-        echo "Branch: ${env.BRANCH_NAME}"
-        sh 'echo correr tests DEV'
-        }
+        checkout scm
+      }
     }
 
-
-    stage('CD - Main') {
-      when {
-        branch 'main'
-      }
+    stage('Kubernetes Context') {
       steps {
-        echo "🚀 Deploy a PROD"
+        withCredentials([file(credentialsId: 'kubeconfig-docker-desktop', variable: 'KUBECONFIG')]) {
+          sh '''
+            export KUBECONFIG=$KUBECONFIG
+            kubectl config get-contexts
+            kubectl config use-context docker-desktop
+            kubectl get nodes
+          '''
+        }
       }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh 'docker build -t fastapi-service1:${BUILD_NUMBER} fastapi-service1'
+      }
+    }
+
+    stage('Helm Deploy') {
+      steps {
+        withCredentials([file(credentialsId: 'kubeconfig-docker-desktop', variable: 'KUBECONFIG')]) {
+          sh '''
+            export KUBECONFIG=$KUBECONFIG
+            helm upgrade --install fastapi-service1 ${CHART_PATH} \
+              --set image.repository=fastapi-service1 \
+              --set image.tag=${BUILD_NUMBER}
+          '''
+        }
+      }
+    }
+  }
+    post {
+    failure {
+      echo "❌ Deployment failed"
+    }
+    success {
+      echo "✅ Deployment successful"
     }
   }
 }

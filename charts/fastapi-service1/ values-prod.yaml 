@@ -1,0 +1,8 @@
+replicas: 3
+
+image:
+  repository: my-dockerhub-user/fastapi-service1
+  tag: v1.2.3
+
+service:
+  port: 8000

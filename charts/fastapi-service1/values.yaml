@@ -1,0 +1,11 @@
+replicaCount: 1
+
+image:
+  repository: fastapi-service1
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
