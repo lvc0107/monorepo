@@ -1,52 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fastapi-service2.fullname" . }}
+  name: fastapi-service2
   labels:
-    {{- include "fastapi-service2.labels" . | nindent 4 }}
+    app: fastapi-service2
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "fastapi-service2.selectorLabels" . | nindent 6 }}
+      app: fastapi-service2
   template:
     metadata:
       labels:
-        {{- include "fastapi-service2.labels" . | nindent 8 }}
+        app: fastapi-service2
     spec:
       containers:
-        - name: {{ include "fastapi-service2.name" . }}
+        - name: fastapi-service2
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 8000
-              protocol: TCP
-          {{- if .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.resources }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- end }}
-          {{- if .Values.env }}
-          env:
-            {{- toYaml .Values.env | nindent 12 }}
-          {{- end }}
-      {{- if .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml .Values.nodeSelector | nindent 8 }}
-      {{- end }}
-      {{- if .Values.tolerations }}
-      tolerations:
-        {{- toYaml .Values.tolerations | nindent 8 }}
-      {{- end }}
-      {{- if .Values.affinity }}
-      affinity:
-        {{- toYaml .Values.affinity | nindent 8 }}
-      {{- end }}
-
+            - containerPort: 2222

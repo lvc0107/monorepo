@@ -1,15 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "fastapi-service2.fullname" . }}
-  labels:
-    {{- include "fastapi-service2.labels" . | nindent 4 }}
+  name: fastapi-service2
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: TCP
-      name: http
+  type: ClusterIP
   selector:
-    {{- include "fastapi-service2.selectorLabels" . | nindent 4 }}
+    app: fastapi-service2 
+  ports:
+    - port: 80
+      targetPort: 2222
+      protocol: TCP

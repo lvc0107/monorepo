@@ -13,18 +13,8 @@ Full release name
 {{- end }}
 
 {{/*
-Common labels
+Labels shared between Deployment and Service
 */}}
 {{- define "fastapi-service2.labels" -}}
-app: {{ include "fastapi-service2.name" . }}
-release: {{ .Release.Name }}
-chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-version: {{ .Chart.AppVersion }}
-{{- end }}
-
-{{/*
-Selector labels
-*/}}
-{{- define "fastapi-service2.selectorLabels" -}}
-app: {{ include "fastapi-service2.name" . }}
+app: fastapi-service2
 {{- end }}
