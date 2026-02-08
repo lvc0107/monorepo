@@ -36,7 +36,12 @@ pipeline {
 
     stage('Build Docker Image') {
         steps {
-            sh 'docker buildx build -t fastapi-service1:${BUILD_NUMBER} --load fastapi-service1'
+            sh '''
+                docker buildx build \
+                    --tag fastapi-service1:${BUILD_NUMBER} \
+                    --load \
+                    fastapi-service1
+            '''
         }
     }
 
