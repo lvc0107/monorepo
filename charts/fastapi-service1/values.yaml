@@ -6,6 +6,6 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
-  port: 80
+  type: LoadBalancer
+  port: 1111
   targetPort: 1111
