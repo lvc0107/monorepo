@@ -8,5 +8,5 @@ spec:
     app: fastapi-service1 
   ports:
     - port: 80
-      targetPort: 8000
+      targetPort: 1111
       protocol: TCP
