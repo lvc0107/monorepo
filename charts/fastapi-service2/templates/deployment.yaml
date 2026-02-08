@@ -20,3 +20,4 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 2222
+              hostPort: 2222
