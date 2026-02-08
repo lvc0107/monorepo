@@ -35,9 +35,9 @@ pipeline {
     }
 
     stage('Build Docker Image') {
-      steps {
-        sh 'docker build -t fastapi-service1:${BUILD_NUMBER} fastapi-service1'
-      }
+        steps {
+            sh 'docker buildx build -t fastapi-service1:${BUILD_NUMBER} --load fastapi-service1'
+        }
     }
 
     stage('Helm Deploy') {
