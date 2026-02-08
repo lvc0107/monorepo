@@ -1,4 +1,4 @@
-replicaCount: 1
+replicaCount: 4
 
 image:
   repository: fastapi-service1
@@ -6,6 +6,6 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
-  port: 80
-  targetPort: 8000
+  type: LoadBalancer
+  port: 1111
+  targetPort: 1111
