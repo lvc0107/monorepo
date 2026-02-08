@@ -13,7 +13,7 @@ Full release name
 {{- end }}
 
 {{/*
-Labels compartidos entre Deployment y Service
+Labels shared between Deployment and Service
 */}}
 {{- define "fastapi-service1.labels" -}}
 app: fastapi-service1

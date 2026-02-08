@@ -8,7 +8,7 @@ A simple FastAPI application with a hello world endpoint.
 - bashcd fastapi-service
 - pip install -r requirements.txt
 - uvicorn main:app --reload
-- Visit: http://localhost:8000
+- Visit: http://localhost:1111 or http://localhost:2222
 
 2. AWS Lambda (/aws-lambda)
 A serverless Python function for AWS Lambda.
