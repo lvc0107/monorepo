@@ -378,6 +378,29 @@ kind-control-plane   kind
 3.4.2) Create the agent
 
 ```
+  docker rm -f jenkins-agent-helm 2>/dev/null || true
+  docker run -d \
+    --name jenkins-agent-helm \
+    --restart unless-stopped \
+    --network jenkins-ci-net \
+    --network host \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v ~/jenkins-workspaces:/home/jenkins/workspace \
+    -v ~/.kube:/root/.kube \
+    jenkins-agent-helm:latest \
+    sh -c '
+      set -e
+      mkdir -p /home/jenkins
+      curl -fsSL http://jenkins-controller:8080/jnlpJars/agent.jar -o /home/jenkins/agent.jar
+      exec java -jar /home/jenkins/agent.jar \
+        -url http://jenkins-controller:8080/ \
+        -secret f380c3285607f406459f44523b40f7cef62ce3f036abe23925282981640e1815 \
+        -name "jenkins-agent-helm" \
+        -webSocket \
+        -workDir "/home/jenkins"
+    '
+
+
 docker rm -f jenkins-agent-helm 2>/dev/null || true
 docker run -d \
   --name jenkins-agent-helm \
@@ -387,16 +410,20 @@ docker run -d \
   -v ~/.kube:/root/.kube \
   jenkins-agent-helm:latest \
   sh -c '
-    set -e
-    mkdir -p /home/jenkins
-    curl -fsSL http://jenkins-controller:8080/jnlpJars/agent.jar -o /home/jenkins/agent.jar
-    exec java -jar /home/jenkins/agent.jar \
-      -url http://jenkins-controller:8080/ \
+    # Ajustar kubeconfig
+    sed -i "s|https://.*:6443|https://host.docker.internal:6443|" /root/.kube/config
+
+    # Descargar agent.jar dinámicamente
+    curl -sO http://jenkins-controller:8080/jnlpJars/agent.jar
+    # Ejecutar agente en modo WebSocket
+    exec java -jar agent.jar \
+      -url http://jenkins-controller:8080 \
       -secret f380c3285607f406459f44523b40f7cef62ce3f036abe23925282981640e1815 \
-      -name "jenkins-agent-helm" \
+      -name jenkins-agent-helm \
       -webSocket \
-      -workDir "/home/jenkins"
+      -workDir /home/jenkins
   '
+  
 
 
 Here we are installing and using JNLP
