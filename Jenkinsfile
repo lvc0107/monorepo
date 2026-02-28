@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'jenkins-agent-helm:latest'
-      args '-v /var/run/docker.sock:/var/run/docker.sock'
-    }
-  }
+  agent { label 'pod-microservice' }
 
   environment {
     SERVICE_NAME = 'fastapi-service1'
