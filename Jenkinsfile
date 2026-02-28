@@ -1,11 +1,21 @@
 pipeline {
-  agent { label 'pod-microservice' }
+  agent {
+    docker {
+      image 'jenkins-agent-helm:latest'
+      args '''
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /root/.kube:/root/.kube:ro \
+        --add-host=kubernetes.docker.internal:host-gateway
+      '''
+    }
+  }
 
   environment {
     SERVICE_NAME = 'fastapi-service1'
     IMAGE_NAME   = 'fastapi-service1'
     IMAGE_TAG    = "${env.BUILD_NUMBER}"
     CHART_PATH   = 'charts/fastapi-service1'
+    KUBECONFIG   = '/root/.kube/config'
   }
 
   stages {
@@ -18,42 +28,36 @@ pipeline {
 
     stage('Kubernetes Context') {
       steps {
-        withCredentials([file(credentialsId: 'kubeconfig-docker-desktop', variable: 'KUBECONFIG')]) {
-          sh '''
-            export KUBECONFIG=$KUBECONFIG
-            kubectl config get-contexts
-            kubectl config use-context docker-desktop
-            kubectl get nodes
-          '''
-        }
+        sh '''
+          kubectl cluster-info
+          kubectl get nodes
+        '''
       }
     }
 
     stage('Build Docker Image') {
-        steps {
-            sh '''
-                docker buildx build \
-                    --tag fastapi-service1:${BUILD_NUMBER} \
-                    --load \
-                    fastapi-service1
-            '''
-        }
+      steps {
+        sh '''
+          docker buildx build \
+            --tag ${IMAGE_NAME}:${BUILD_NUMBER} \
+            --load \
+            ${SERVICE_NAME}
+        '''
+      }
     }
 
     stage('Helm Deploy') {
       steps {
-        withCredentials([file(credentialsId: 'kubeconfig-docker-desktop', variable: 'KUBECONFIG')]) {
-          sh '''
-            export KUBECONFIG=$KUBECONFIG
-            helm upgrade --install fastapi-service1 ${CHART_PATH} \
-              --set image.repository=fastapi-service1 \
-              --set image.tag=${BUILD_NUMBER}
-          '''
-        }
+        sh '''
+          helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
+            --set image.repository=${IMAGE_NAME} \
+            --set image.tag=${BUILD_NUMBER}
+        '''
       }
     }
   }
-    post {
+
+  post {
     failure {
       echo "❌ Deployment failed"
     }

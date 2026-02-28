@@ -218,6 +218,19 @@ Using Docker compose:
 docker compose down
 docker compose up -d
 
+(if in some point you need to reset the Jenkins state,
+lets say for making an updagrade,  
+allways check you have a backup of your Jenkins data (jobs, credentials, plugins, etc) before resetting the state, by having a persistent volume or host directory mapped to /var/jenkins_home in the docker compose file, for example:
+   volumes:
+         - /your/host/jenkins_home:/var/jenkins_home
+
+To reset the state, you can remove the Jenkins volume. This will delete all Jenkins data, so make sure you have a backup before doing this. You can remove the Jenkins volume with the following command
+
+just run: docker compose down -v
+docker compose pull
+docker compose up -d
+)
+
 #check the container status
 
 docker logs -f jenkins-controller
@@ -298,6 +311,15 @@ docker exec jenkins-controller \
        Install Docker.  
        Install Docker Pipeline.  
        Install github-scm-trait-notification-context # for detecting PR.  
+       Install Kubernetes CLI Plugin.  
+       Install Kubernetes plugin.  
+       Install Helm plugin.  
+       Install GitHub plugin.  
+       Install GitHub Branch Source plugin.  
+       Install GitHub Pull Request Builder plugin.  
+       Install GitHub plugin.  
+       Install GitHub Branch Source plugin.  
+       Install GitHub Pull Request Builder plugin.
   2.3.2) Install y restart Jenkins.    
   2.4) Create multibranch pipeline.  
     2.4.1) Branch Sources: GitHub.  
@@ -441,7 +463,16 @@ Docker Agent (jenkins-agent-helm)
 ```
 
 
-3.4.3) Verify connection. This command verify the connection between the controller and the agent
+
+3.4.3) Verify the Jenkins controller and the Jenkins agent are running.
+```
+docker ps | grep jenkins 
+
+254acdd63565   jenkins-agent-helm:latest   "tail -f /dev/null"      3 minutes ago        Up 3 minutes                                                           jenkins-agent
+e4a8b59a81e3   jenkins/jenkins:lts         "/usr/bin/tini -- /u…"   22 hours ago         Up 27 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins
+```
+
+3.4.4) Verify connection. This command verify the connection between the controller and the agent
 ```
 docker logs -f jenkins-agent-helm
 INFO: Agent discovery successful
@@ -466,15 +497,23 @@ INFO: Connected
 
 
 
-3.4.4) Verify the Jenkins controller and the Jenkins agent are running.
-```
-docker ps | grep jenkins 
-
-254acdd63565   jenkins-agent-helm:latest   "tail -f /dev/null"      3 minutes ago        Up 3 minutes                                                           jenkins-agent
-e4a8b59a81e3   jenkins/jenkins:lts         "/usr/bin/tini -- /u…"   22 hours ago         Up 27 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins
-```
-
-
+4) Create cloud for Kubernetes agents
+  4.1) Go Manage Jenkins → Manage Clouds → Add a new cloud → Kubernetes.  
+    Name: Kubernetes.  
+    Kubernetes URL: https://kubernetes.docker.internal:6443.  
+    Kubernetes Namespace: monorepo.  
+    Credentials: Add → Jenkins → Global credentials → Secret file → Upload kubeconfig file (from ~/.kube/config).  
+    Save.
+  4.2) Create Pod Template.  
+    In the same Kubernetes cloud configuration, add a Pod Template.  
+    Name: jenkins-agent-helm.  
+    Labels: helm,docker,kubectl.  
+    Add container:   
+      Name: jenkins-agent-helm.  
+      Docker image: jenkins-agent-helm:latest (we will create this image in the next step).  
+      Command to run: (leave empty).  
+      Arguments to pass to the command: (leave empty).  
+    Save.
 
 
 8) in Jenkins Create credentials for k8 cluster
