@@ -502,9 +502,18 @@ INFO: Connected
     Name: Kubernetes.  
     Kubernetes URL: https://kubernetes.docker.internal:6443.  
     Kubernetes Namespace: monorepo.  
-    Credentials: Add → Jenkins → Global credentials → Secret file → Upload kubeconfig file (from ~/.kube/config).  
+    
+  4.2) Credentials: Add → Jenkins → Global credentials → Secret file → Upload kubeconfig file (from ~/.kube/config).  # This kubeconfig file should have the correct context for connecting to your Kubernetes cluster (e.g., Docker Desktop, kind, minikube, etc.).
+  ID: kubeconfig.  
+  Description: kubeconfig for Jenkins agent.
+
+  Note if for some reason you must reset the cluster in Docker Desktop, you will need to update the kubeconfig file with the new cluster information and re-upload it to Jenkins as a secret file credential.
+
+
+
+
     Save.
-  4.2) Create Pod Template.  
+  4.3) Create Pod Template.  
     In the same Kubernetes cloud configuration, add a Pod Template.  
     Name: jenkins-agent-helm.  
     Labels: helm,docker,kubectl.  
@@ -514,20 +523,47 @@ INFO: Connected
       Command to run: (leave empty).  
       Arguments to pass to the command: (leave empty).  
     Save.
+   4.3) for local testing, we wont use TLS. So check: 
+        Disable https certificate check
+   4.4) create permisssion to access the cluster. You can create a ServiceAccount with appropriate RBAC permissions for the monorepo namespace
+   got to K8 folder and run:
+           kubectl apply -f jenkins-rbac.yaml
+                Warning: resource namespaces/monorepo is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+namespace/monorepo configured
+serviceaccount/jenkins created
+role.rbac.authorization.k8s.io/jenkins-role created
+rolebinding.rbac.authorization.k8s.io/jenkins-role-binding created
 
 
-8) in Jenkins Create credentials for k8 cluster
- 8.1) cat kube_config >> kube_config(in host)
- 8.2) In Jenkins → Manage Jenkins → Credentials
-Scope: Global
-Kind: Secret file
-File: paste kube_config file
-ID: kubeconfig-docker-desktop
-📌 This is simulating exactly:
-- EKS kubeconfig
-- GKE kubeconfig
-- AKS kubeconfig
+4.5)# Create access token
+
+# Generar kubeconfig para el ServiceAccount
+cat > jenkins-kubeconfig.yaml <<EOF
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority-data: $(kubectl config view --raw -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
+    server: https://kubernetes.docker.internal:6443
+  name: docker-desktop
+contexts:
+- context:
+    cluster: docker-desktop
+    namespace: monorepo
+    user: jenkins
+  name: jenkins-context
+current-context: jenkins-context
+users:
+- name: jenkins
+  user:
+    token: $(kubectl create token jenkins -n monorepo --duration=8760h)
+EOF
+
+4.6) Upload the generated kubeconfig file (jenkins-kubeconfig.yaml) to Jenkins as a secret file credential, and use this credential in the Kubernetes cloud configuration.
+
+4.7) Configurar el Pod Template correctamente
+En Manage Jenkins → Clouds → Kubernetes → Pod Templates:
 
 
-
-KIND
+4.8) Verify the service was deployed 
+kubectl get pods -l app=fastapi-service1
