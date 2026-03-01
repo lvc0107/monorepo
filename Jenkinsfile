@@ -1,5 +1,7 @@
 pipeline {
-  agent any
+  agent {
+    label 'jenkins-agent-helm'  // ← Igual al nombre del template
+  }
 
   environment {
     SERVICE_NAME = 'fastapi-service1'
@@ -19,20 +21,22 @@ pipeline {
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
           sh '''
-            mkdir -p $HOME/.kube
-            cp $KUBECONFIG_FILE $HOME/.kube/config
-            chmod 600 $HOME/.kube/config
+            mkdir -p /tmp
+            cp $KUBECONFIG_FILE /tmp/kubeconfig
+            chmod 600 /tmp/kubeconfig
             
+            sed -i 's/127.0.0.1/kubernetes.docker.internal/g' /tmp/kubeconfig
+            sed -i 's/localhost/kubernetes.docker.internal/g' /tmp/kubeconfig
+            
+            export KUBECONFIG=/tmp/kubeconfig
             kubectl config get-contexts
-            kubectl config current-context
             kubectl cluster-info
-            kubectl get nodes
           '''
         }
       }
     }
 
-   stage('Build Docker Image') {
+    stage('Build Docker Image') {
       steps {
         sh '''
           docker build \
@@ -45,29 +49,18 @@ pipeline {
 
     stage('Helm Deploy') {
       steps {
-        script {
-          // Ejecutar helm en contenedor, pero montando solo lo necesario
-          docker.image('jenkins-agent-helm:latest').inside('--add-host=kubernetes.docker.internal:host-gateway -v $HOME/.kube:/root/.kube:ro') {
-            sh '''
-              export KUBECONFIG=/root/.kube/config
-              
-              helm version
-              helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
-                --set image.repository=${IMAGE_NAME} \
-                --set image.tag=${BUILD_NUMBER}
-            '''
-          }
-        }
+        sh '''
+          export KUBECONFIG=/tmp/kubeconfig
+          
+          helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
+            --set image.repository=${IMAGE_NAME} \
+            --set image.tag=${BUILD_NUMBER}
+        '''
       }
     }
   }
 
   post {
-    always {
-      sh '''
-        rm -f $HOME/.kube/config 2>/dev/null || true
-      '''
-    }
     failure {
       echo "❌ Deployment failed"
     }
