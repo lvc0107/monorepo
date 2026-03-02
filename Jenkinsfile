@@ -1,9 +1,6 @@
 pipeline {
   agent {
-    docker {
-      image 'jenkins-agent-helm:latest'
-      args '-v /var/run/docker.sock:/var/run/docker.sock'
-    }
+    label 'jenkins-agent-helm'
   }
 
   environment {
@@ -11,24 +8,30 @@ pipeline {
     IMAGE_NAME   = 'fastapi-service1'
     IMAGE_TAG    = "${env.BUILD_NUMBER}"
     CHART_PATH   = 'charts/fastapi-service1'
+    NAMESPACE    = 'monorepo'
   }
 
   stages {
-
     stage('Checkout') {
       steps {
         checkout scm
       }
     }
 
-    stage('Kubernetes Context') {
+    stage('Setup Kubeconfig') {
       steps {
-        withCredentials([file(credentialsId: 'kubeconfig-docker-desktop', variable: 'KUBECONFIG')]) {
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
           sh '''
-            export KUBECONFIG=$KUBECONFIG
+            mkdir -p /tmp
+            cp $KUBECONFIG_FILE /tmp/kubeconfig
+            chmod 600 /tmp/kubeconfig
+            
+            sed -i 's/127.0.0.1/kubernetes.docker.internal/g' /tmp/kubeconfig
+            sed -i 's/localhost/kubernetes.docker.internal/g' /tmp/kubeconfig
+            
+            export KUBECONFIG=/tmp/kubeconfig
             kubectl config get-contexts
-            kubectl config use-context docker-desktop
-            kubectl get nodes
+            kubectl cluster-info
           '''
         }
       }
@@ -36,29 +39,50 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        sh 'docker build -t fastapi-service1:${BUILD_NUMBER} fastapi-service1'
+        sh '''
+          docker build \
+            -t ${IMAGE_NAME}:${BUILD_NUMBER} \
+            -t ${IMAGE_NAME}:latest \
+            ${SERVICE_NAME}
+        '''
       }
     }
 
     stage('Helm Deploy') {
       steps {
-        withCredentials([file(credentialsId: 'kubeconfig-docker-desktop', variable: 'KUBECONFIG')]) {
-          sh '''
-            export KUBECONFIG=$KUBECONFIG
-            helm upgrade --install fastapi-service1 ${CHART_PATH} \
-              --set image.repository=fastapi-service1 \
-              --set image.tag=${BUILD_NUMBER}
-          '''
-        }
+        sh '''
+          export KUBECONFIG=/tmp/kubeconfig
+          
+          helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
+            --namespace ${NAMESPACE} \
+            --create-namespace \
+            --set image.repository=${IMAGE_NAME} \
+            --set image.tag=${BUILD_NUMBER} \
+            --wait \
+            --timeout 5m
+        '''
+      }
+    }
+
+    stage('Verify Deployment') {
+      steps {
+        sh '''
+          export KUBECONFIG=/tmp/kubeconfig
+          
+          echo "=== Namespace: ${NAMESPACE} ==="
+          kubectl get pods -n ${NAMESPACE} -l app=${SERVICE_NAME}
+          kubectl get svc -n ${NAMESPACE} ${SERVICE_NAME}
+        '''
       }
     }
   }
-    post {
+
+  post {
     failure {
       echo "❌ Deployment failed"
     }
     success {
-      echo "✅ Deployment successful"
+      echo "✅ Deployment successful in namespace: ${NAMESPACE}"
     }
   }
 }

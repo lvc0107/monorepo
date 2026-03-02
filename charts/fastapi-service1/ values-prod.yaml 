@@ -5,4 +5,4 @@ image:
   tag: v1.2.3
 
 service:
-  port: 8000
+  port: 1111
