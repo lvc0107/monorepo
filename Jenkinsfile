@@ -1,6 +1,6 @@
 pipeline {
   agent {
-    label 'jenkins-agent-helm'  // ← Igual al nombre del template
+    label 'jenkins-agent-helm'
   }
 
   environment {
@@ -8,6 +8,7 @@ pipeline {
     IMAGE_NAME   = 'fastapi-service1'
     IMAGE_TAG    = "${env.BUILD_NUMBER}"
     CHART_PATH   = 'charts/fastapi-service1'
+    NAMESPACE    = 'monorepo'
   }
 
   stages {
@@ -53,8 +54,24 @@ pipeline {
           export KUBECONFIG=/tmp/kubeconfig
           
           helm upgrade --install ${SERVICE_NAME} ${CHART_PATH} \
+            --namespace ${NAMESPACE} \
+            --create-namespace \
             --set image.repository=${IMAGE_NAME} \
-            --set image.tag=${BUILD_NUMBER}
+            --set image.tag=${BUILD_NUMBER} \
+            --wait \
+            --timeout 5m
+        '''
+      }
+    }
+
+    stage('Verify Deployment') {
+      steps {
+        sh '''
+          export KUBECONFIG=/tmp/kubeconfig
+          
+          echo "=== Namespace: ${NAMESPACE} ==="
+          kubectl get pods -n ${NAMESPACE} -l app=${SERVICE_NAME}
+          kubectl get svc -n ${NAMESPACE} ${SERVICE_NAME}
         '''
       }
     }
@@ -65,7 +82,7 @@ pipeline {
       echo "❌ Deployment failed"
     }
     success {
-      echo "✅ Deployment successful"
+      echo "✅ Deployment successful in namespace: ${NAMESPACE}"
     }
   }
 }
